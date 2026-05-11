@@ -1,8 +1,10 @@
 package com.krce.pages;
 
 import com.krce.base.BasePage;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class LoginPage extends BasePage {
@@ -36,5 +38,12 @@ public class LoginPage extends BasePage {
         enterUserId(userId);
         enterPassword(password);
         clickLogin();
+    }
+
+    public String getAlertTextAndAccept() {
+        Alert alert = wait.until(ExpectedConditions.alertIsPresent());
+        String alertText = alert.getText();
+        alert.accept();
+        return alertText;
     }
 }

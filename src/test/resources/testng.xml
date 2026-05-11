@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<suite name="BankBot Test Suite">
+
+    <test name="Login Tests">
+        <classes>
+            <class name="com.krce.tests.LoginTest"/>
+        </classes>
+    </test>
+
+</suite>
