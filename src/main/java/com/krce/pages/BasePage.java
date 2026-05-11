@@ -3,6 +3,7 @@ package com.krce.base;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -31,8 +32,18 @@ public class BasePage {
         element.click();
     }
 
+    public void jsClick(By locator) {
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("arguments[0].click();", element);
+    }
+
     public String getElementText(By locator) {
         WebElement element = waitForElement(locator);
         return element.getText();
+    }
+
+    public boolean isElementDisplayed(By locator) {
+        return waitForElement(locator).isDisplayed();
     }
 }
