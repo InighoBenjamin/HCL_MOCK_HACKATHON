@@ -14,40 +14,61 @@ public class FundTransferTest extends BaseTest {
         loginPage.login(ConfigReader.getUsername(), ConfigReader.getPassword());
     }
 
+    private String createCustomerAndGetAccount(String name, String gender, String dob,
+                                                String email, String deposit) {
+        ManagerPage mgr = new ManagerPage(driver, wait);
+        mgr.clickNewCustomer();
+
+        NewCustomerPage ncp = new NewCustomerPage(driver, wait);
+        ncp.fillAndSubmit(name, gender, dob,
+                "Test Addr", "Chennai", "TamilNadu", "600001",
+                "9111111111", email, "Pass@1");
+
+        // check for alert
+        String alert = ncp.getAlertText();
+        if (!alert.isEmpty()) {
+            System.out.println("Alert: " + alert);
+            return null;
+        }
+
+        if (!ncp.isSuccessDisplayed()) {
+            return null;
+        }
+
+        String custId = ncp.getCustomerId();
+        System.out.println("Customer: " + custId);
+
+        mgr.clickNewAccount();
+        NewAccountPage nap = new NewAccountPage(driver, wait);
+        nap.createAccount(custId, "Savings", deposit);
+
+        if (!nap.isAccountCreated()) {
+            nap.getAlertText();
+            return null;
+        }
+        return nap.getAccountId();
+    }
+
     @Test(priority = 1)
     public void testValidFundTransfer() {
         loginAsManager();
 
-        // create 2 customers + 2 accounts for transfer
-        ManagerPage mgr = new ManagerPage(driver, wait);
+        // create payer
+        String ts = String.valueOf(System.currentTimeMillis());
+        String payerAcct = createCustomerAndGetAccount("Payer User", "male", "10/01/1990",
+                "payer_" + ts + "@mail.com", "50000");
+        Assert.assertNotNull(payerAcct, "Payer account should be created");
+        System.out.println("Payer account: " + payerAcct);
 
-        // customer 1
-        mgr.clickNewCustomer();
-        NewCustomerPage ncp = new NewCustomerPage(driver, wait);
-        String email1 = "ft1_" + System.currentTimeMillis() + "@mail.com";
-        ncp.fillAndSubmit("Payer User", "male", "01/10/1990",
-                "Addr1", "Chennai", "TN", "600001", "9111111111", email1, "Pass@1");
-        String custId1 = ncp.getCustomerId();
-
-        mgr.clickNewAccount();
-        NewAccountPage nap = new NewAccountPage(driver, wait);
-        nap.createAccount(custId1, "Savings", "50000");
-        String payerAcct = nap.getAccountId();
-
-        // customer 2
-        mgr.clickNewCustomer();
-        NewCustomerPage ncp2 = new NewCustomerPage(driver, wait);
-        String email2 = "ft2_" + System.currentTimeMillis() + "@mail.com";
-        ncp2.fillAndSubmit("Payee User", "female", "05/20/1992",
-                "Addr2", "Mumbai", "MH", "400001", "9222222222", email2, "Pass@2");
-        String custId2 = ncp2.getCustomerId();
-
-        mgr.clickNewAccount();
-        NewAccountPage nap2 = new NewAccountPage(driver, wait);
-        nap2.createAccount(custId2, "Savings", "10000");
-        String payeeAcct = nap2.getAccountId();
+        // create payee - use new login session to avoid DOB caching issues
+        loginAsManager();
+        String payeeAcct = createCustomerAndGetAccount("Payee User", "female", "20/05/1992",
+                "payee_" + ts + "@mail.com", "10000");
+        Assert.assertNotNull(payeeAcct, "Payee account should be created");
+        System.out.println("Payee account: " + payeeAcct);
 
         // do fund transfer
+        ManagerPage mgr = new ManagerPage(driver, wait);
         mgr.clickFundTransfer();
         FundTransferPage ftp = new FundTransferPage(driver, wait);
         ftp.transferFunds(payerAcct, payeeAcct, "5000", "Test transfer");

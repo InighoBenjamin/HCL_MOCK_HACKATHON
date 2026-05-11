@@ -8,7 +8,6 @@ import org.testng.annotations.Test;
 
 public class AccountTest extends BaseTest {
 
-    // saved for FundTransferTest
     public static String savedAccountId = "";
     public static String savedAccountId2 = "";
 
@@ -18,29 +17,54 @@ public class AccountTest extends BaseTest {
         loginPage.login(ConfigReader.getUsername(), ConfigReader.getPassword());
     }
 
+    private String createCustomerAndAccount(String name, String gender, String dob,
+                                             String email, String deposit) {
+        ManagerPage mgr = new ManagerPage(driver, wait);
+        mgr.clickNewCustomer();
+
+        NewCustomerPage ncp = new NewCustomerPage(driver, wait);
+        ncp.fillAndSubmit(name, gender, dob,
+                "Test Street", "Chennai", "TamilNadu", "600001",
+                "9876543210", email, "Pass@123");
+
+        // check for alert first (e.g. "please fill all fields")
+        String alert = ncp.getAlertText();
+        if (!alert.isEmpty()) {
+            System.out.println("Customer creation alert: " + alert);
+            return null;
+        }
+
+        if (!ncp.isSuccessDisplayed()) {
+            System.out.println("Customer creation did not show success page");
+            return null;
+        }
+
+        String custId = ncp.getCustomerId();
+        System.out.println("Customer created: " + custId);
+
+        mgr.clickNewAccount();
+        NewAccountPage nap = new NewAccountPage(driver, wait);
+        nap.createAccount(custId, "Savings", deposit);
+
+        if (!nap.isAccountCreated()) {
+            String acctAlert = nap.getAlertText();
+            System.out.println("Account creation alert: " + acctAlert);
+            return null;
+        }
+
+        return nap.getAccountId();
+    }
+
     @Test(priority = 1)
     public void testCreateNewAccount() {
         loginAsManager();
 
-        // first create a customer for the account
-        ManagerPage mgr = new ManagerPage(driver, wait);
-        mgr.clickNewCustomer();
-        NewCustomerPage ncp = new NewCustomerPage(driver, wait);
         String email = "acct" + System.currentTimeMillis() + "@mail.com";
-        ncp.fillAndSubmit("Account User", "male", "03/10/1990",
-                "Acct Street", "Delhi", "Delhi",
-                "110001", "9111111111", email, "Acct@123");
-        String custId = ncp.getCustomerId();
-        System.out.println("Customer created: " + custId);
+        String acctId = createCustomerAndAccount("Account User", "male", "10/03/1990",
+                email, "50000");
 
-        // now create savings account
-        mgr.clickNewAccount();
-        NewAccountPage nap = new NewAccountPage(driver, wait);
-        nap.createAccount(custId, "Savings", "50000");
-
-        Assert.assertTrue(nap.isAccountCreated(), "Account should be created");
-        savedAccountId = nap.getAccountId();
-        Assert.assertFalse(savedAccountId.isEmpty(), "Account ID should be generated");
+        Assert.assertNotNull(acctId, "Account should be created");
+        savedAccountId = acctId;
         System.out.println("Account created: " + savedAccountId);
     }
 
@@ -48,22 +72,12 @@ public class AccountTest extends BaseTest {
     public void testCreateSecondAccount() {
         loginAsManager();
 
-        // create another customer + account for fund transfer
-        ManagerPage mgr = new ManagerPage(driver, wait);
-        mgr.clickNewCustomer();
-        NewCustomerPage ncp = new NewCustomerPage(driver, wait);
         String email = "acct2" + System.currentTimeMillis() + "@mail.com";
-        ncp.fillAndSubmit("Second User", "female", "07/22/1993",
-                "Second Street", "Mumbai", "Maharashtra",
-                "400001", "9222222222", email, "Acct@456");
-        String custId = ncp.getCustomerId();
+        String acctId = createCustomerAndAccount("Second User", "female", "22/07/1993",
+                email, "30000");
 
-        mgr.clickNewAccount();
-        NewAccountPage nap = new NewAccountPage(driver, wait);
-        nap.createAccount(custId, "Savings", "30000");
-
-        Assert.assertTrue(nap.isAccountCreated());
-        savedAccountId2 = nap.getAccountId();
+        Assert.assertNotNull(acctId, "Second account should be created");
+        savedAccountId2 = acctId;
         System.out.println("Second account created: " + savedAccountId2);
     }
 

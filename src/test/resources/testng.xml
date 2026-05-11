@@ -1,15 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="BankBot Automation Suite">
 
-<suite name="BankBot Test Suite">
+    <listeners>
+        <listener class-name="com.krce.utils.TestListener"/>
+    </listeners>
 
-    <test name="Login Tests">
+    <test name="Module 1 - Login">
         <classes>
             <class name="com.krce.tests.LoginTest"/>
         </classes>
     </test>
-    <test name="Customer Management Tests">
+
+    <test name="Module 2 - Customer">
         <classes>
             <class name="com.krce.tests.CustomerTest"/>
+        </classes>
+    </test>
+
+    <test name="Module 3 - Account">
+        <classes>
+            <class name="com.krce.tests.AccountTest"/>
+        </classes>
+    </test>
+
+    <test name="Module 4 - Fund Transfer">
+        <classes>
+            <class name="com.krce.tests.FundTransferTest"/>
+        </classes>
+    </test>
+
+    <test name="Module 5 - Validation">
+        <classes>
+            <class name="com.krce.tests.ValidationTest"/>
         </classes>
     </test>
 

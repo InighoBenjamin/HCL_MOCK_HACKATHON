@@ -3,7 +3,9 @@ package com.krce.pages;
 import com.krce.base.BasePage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class NewCustomerPage extends BasePage {
@@ -49,7 +51,22 @@ public class NewCustomerPage extends BasePage {
     }
 
     public void enterDob(String dob) {
-        typeText(dobField, dob);
+        // Guru99 DOB is type="date" - try sendKeys first, then JS fallback
+        WebElement el = waitForElement(dobField);
+        el.click();
+        el.sendKeys(dob);
+
+        // verify if value was set - if empty, use JavaScript fallback
+        String currentVal = el.getAttribute("value");
+        if (currentVal == null || currentVal.isEmpty()) {
+            // convert dd/mm/yyyy to yyyy-mm-dd for JS
+            String[] parts = dob.split("/");
+            if (parts.length == 3) {
+                String isoDate = parts[2] + "-" + parts[1] + "-" + parts[0];
+                JavascriptExecutor js = (JavascriptExecutor) driver;
+                js.executeScript("arguments[0].value = arguments[1];", el, isoDate);
+            }
+        }
     }
 
     public void enterAddress(String addr) {
@@ -108,7 +125,7 @@ public class NewCustomerPage extends BasePage {
         return getElementText(custIdValue);
     }
 
-    // validation methods - click field, tab out, check error
+    // validation methods
     public void tabOutOfName() {
         driver.findElement(nameField).sendKeys(Keys.TAB);
     }

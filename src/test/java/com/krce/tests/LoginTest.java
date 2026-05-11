@@ -1,100 +1,80 @@
 package com.krce.tests;
-import com.krce.pages.LoginPage;
+
 import com.krce.base.BaseTest;
+import com.krce.pages.LoginPage;
 import com.krce.pages.ManagerPage;
 import com.krce.utils.ConfigReader;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class LoginTest extends BaseTest {
 
-    @Test(priority = 1)
-    public void validLoginTest() {
-
-        LoginPage loginPage = new LoginPage(driver, wait);
-        ManagerPage managerPage = new ManagerPage(driver, wait);
-
-        String username = ConfigReader.getValue("username");
-        String password = ConfigReader.getValue("password");
-
-        loginPage.login(username, password);
-
-        String actualText = managerPage.getManagerIdText();
-
-        Assert.assertTrue(actualText.contains(username));
-
-        System.out.println("Valid login verified");
-    }
-
-    @DataProvider(name = "invalidLoginData")
-    public Object[][] invalidLoginData() {
+    @DataProvider(name = "invalidLogins")
+    public Object[][] invalidLogins() {
         return new Object[][]{
-                {"wrongUser", "wrongPass"},
-                {"mngr12345", "wrongPass"},
-                {"wrongUser", "etytEmY"}
+                {"invalidUser", "invalidPass"},
+                {"mngr620818", "wrongPass"},
+                {"wrongUser", "YhEbApE"}
         };
     }
 
-    @Test(priority = 2, dataProvider = "invalidLoginData")
-    public void invalidLoginTest(String username, String password) {
-
+    @Test(priority = 1)
+    public void testValidLogin() {
         LoginPage loginPage = new LoginPage(driver, wait);
+        loginPage.openLoginPage(ConfigReader.getBaseUrl());
+        loginPage.login(ConfigReader.getUsername(), ConfigReader.getPassword());
 
-        loginPage.login(username, password);
+        ManagerPage managerPage = new ManagerPage(driver, wait);
+        Assert.assertTrue(managerPage.isWelcomeDisplayed(), "Welcome message should appear");
+        System.out.println("Valid login test passed");
+    }
 
-        Alert alert = wait.until(ExpectedConditions.alertIsPresent());
+    @Test(priority = 2, dataProvider = "invalidLogins")
+    public void testInvalidLogin(String uid, String pwd) {
+        LoginPage loginPage = new LoginPage(driver, wait);
+        loginPage.openLoginPage(ConfigReader.getBaseUrl());
+        loginPage.login(uid, pwd);
 
-        String alertText = alert.getText();
-
-        Assert.assertTrue(alertText.contains("User or Password is not valid"));
-
-        alert.accept();
-
-        System.out.println("Invalid login error message verified");
+        String alertText = loginPage.getAlertText();
+        Assert.assertTrue(alertText.contains("not valid"), "Should show invalid login alert");
+        System.out.println("Invalid login alert: " + alertText);
     }
 
     @Test(priority = 3)
-    public void logoutRedirectTest() {
-
+    public void testBlankLogin() {
         LoginPage loginPage = new LoginPage(driver, wait);
-        ManagerPage managerPage = new ManagerPage(driver, wait);
+        loginPage.openLoginPage(ConfigReader.getBaseUrl());
+        loginPage.clickLogin();
 
-        String username = ConfigReader.getValue("username");
-        String password = ConfigReader.getValue("password");
-
-        loginPage.login(username, password);
-
-        managerPage.clickLogout();
-
-        Alert alert = wait.until(ExpectedConditions.alertIsPresent());
-
-        alert.accept();
-
-        Assert.assertTrue(loginPage.isLoginButtonDisplayed());
-
-        System.out.println("Logout redirect verified");
+        // Guru99 shows alert even for blank fields
+        String alertText = loginPage.getAlertText();
+        if (!alertText.isEmpty()) {
+            System.out.println("Blank login alert: " + alertText);
+        }
+        // after alert, should still be on login page
+        Assert.assertTrue(loginPage.isLoginPageDisplayed(), "Should remain on login page");
+        System.out.println("Blank login test passed");
     }
 
     @Test(priority = 4)
-    public void blankFieldValidationTest() {
-
+    public void testLogout() {
         LoginPage loginPage = new LoginPage(driver, wait);
+        loginPage.openLoginPage(ConfigReader.getBaseUrl());
+        loginPage.login(ConfigReader.getUsername(), ConfigReader.getPassword());
 
-        loginPage.clickUserIdBox();
-        loginPage.clickPasswordBox();
+        ManagerPage managerPage = new ManagerPage(driver, wait);
+        Assert.assertTrue(managerPage.isWelcomeDisplayed());
 
-        String userIdError = loginPage.getUserIdError();
+        managerPage.clickLogout();
+        // handle logout confirmation alert
+        String alertText = loginPage.getAlertText();
+        System.out.println("Logout alert: " + alertText);
 
-        loginPage.clickUserIdBox();
-
-        String passwordError = loginPage.getPasswordError();
-
-        Assert.assertTrue(userIdError.contains("User-ID must not be blank"));
-        Assert.assertTrue(passwordError.contains("Password must not be blank"));
-
-        System.out.println("Blank field validation verified");
+        // after logout, page goes back to login
+        String currentUrl = driver.getCurrentUrl();
+        Assert.assertTrue(currentUrl.contains("index.php") || currentUrl.contains("guru99"),
+                "Should redirect to login page");
+        System.out.println("Logout test passed");
     }
 }

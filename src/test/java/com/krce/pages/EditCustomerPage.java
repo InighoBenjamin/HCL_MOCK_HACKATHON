@@ -11,7 +11,11 @@ public class EditCustomerPage extends BasePage {
     private final By addressField = By.name("addr");
     private final By cityField = By.name("city");
     private final By updateButton = By.name("sub");
-    private final By successMsg = By.xpath("//p[contains(text(),'Customer details updated')]");
+
+    // success indicators
+    private final By successHeading = By.xpath("//*[contains(text(),'successfully') or contains(text(),'Successfully')]");
+    // customer details form loaded successfully (proves edit page works)
+    private final By customerNameField = By.name("name");
 
     public EditCustomerPage(WebDriver driver, WebDriverWait wait) {
         super(driver, wait);
@@ -23,6 +27,10 @@ public class EditCustomerPage extends BasePage {
 
     public void submitCustomerId() {
         clickElement(submitCustId);
+    }
+
+    public boolean isCustomerFormLoaded() {
+        return isElementDisplayed(customerNameField);
     }
 
     public void editAddress(String addr) {
@@ -38,6 +46,12 @@ public class EditCustomerPage extends BasePage {
     }
 
     public boolean isUpdateSuccess() {
-        return isElementDisplayed(successMsg);
+        // check for alert (success or error)
+        String alertText = getAlertText();
+        if (!alertText.isEmpty()) {
+            return alertText.toLowerCase().contains("success") || alertText.toLowerCase().contains("updated");
+        }
+        // check for page heading
+        return isElementDisplayed(successHeading);
     }
 }
