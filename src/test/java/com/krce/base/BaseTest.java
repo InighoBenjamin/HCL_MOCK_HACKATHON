@@ -10,7 +10,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import java.time.Duration;
-
 public class BaseTest {
     public WebDriver driver;
     public WebDriverWait wait;
@@ -29,7 +28,6 @@ public class BaseTest {
         wait = new WebDriverWait(driver, Duration.ofSeconds(ConfigReader.getTimeout()));
         System.out.println("Browser opened: " + browser);
     }
-
     @AfterClass
     public void tearDown() {
         if (driver != null) {
