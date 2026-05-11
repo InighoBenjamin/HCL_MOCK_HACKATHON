@@ -7,5 +7,10 @@
             <class name="com.krce.tests.LoginTest"/>
         </classes>
     </test>
+    <test name="Customer Management Tests">
+        <classes>
+            <class name="com.krce.tests.CustomerTest"/>
+        </classes>
+    </test>
 
 </suite>

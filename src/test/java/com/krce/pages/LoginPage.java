@@ -6,58 +6,38 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class LoginPage extends BasePage {
-
-    By userIdTextbox = By.name("uid");
-    By passwordTextbox = By.name("password");
-    By loginButton = By.name("btnLogin");
-    By resetButton = By.name("btnReset");
-
-    By userIdError = By.id("message23");
-    By passwordError = By.id("message18");
+    private final By userIdField = By.name("uid");
+    private final By passwordField = By.name("password");
+    private final By loginButton = By.name("btnLogin");
+    private final By loginHeading = By.xpath("//h2[contains(text(),'Guru99 Bank')]");
 
     public LoginPage(WebDriver driver, WebDriverWait wait) {
         super(driver, wait);
     }
 
-    public void enterUserId(String userId) {
-        typeText(userIdTextbox, userId);
+    public void openLoginPage(String url) {
+        driver.get(url);
     }
 
-    public void enterPassword(String password) {
-        typeText(passwordTextbox, password);
+    public void enterUserId(String uid) {
+        typeText(userIdField, uid);
+    }
+
+    public void enterPassword(String pwd) {
+        typeText(passwordField, pwd);
     }
 
     public void clickLogin() {
         clickElement(loginButton);
     }
 
-    public void clickReset() {
-        clickElement(resetButton);
-    }
-
-    public void login(String userId, String password) {
-        enterUserId(userId);
-        enterPassword(password);
+    public void login(String uid, String pwd) {
+        enterUserId(uid);
+        enterPassword(pwd);
         clickLogin();
     }
 
-    public void clickUserIdBox() {
-        clickElement(userIdTextbox);
-    }
-
-    public void clickPasswordBox() {
-        clickElement(passwordTextbox);
-    }
-
-    public String getUserIdError() {
-        return getElementText(userIdError);
-    }
-
-    public String getPasswordError() {
-        return getElementText(passwordError);
-    }
-
-    public boolean isLoginButtonDisplayed() {
-        return isElementDisplayed(loginButton);
+    public boolean isLoginPageDisplayed() {
+        return isElementDisplayed(loginHeading);
     }
 }
