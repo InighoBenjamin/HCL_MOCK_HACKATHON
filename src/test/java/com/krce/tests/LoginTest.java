@@ -77,4 +77,17 @@ public class LoginTest extends BaseTest {
                 "Should redirect to login page");
         System.out.println("Logout test passed");
     }
+    @Test
+    public void intentionalFailTest() {
+
+        LoginPage loginPage = new LoginPage(driver, wait);
+
+        loginPage.login("wrongUser", "wrongPass");
+
+        String alertText = loginPage.getAlertText();
+
+        Assert.assertTrue(alertText.contains("Login Successful"));
+
+        System.out.println("This line will not print");
+    }
 }

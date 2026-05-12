@@ -22,22 +22,35 @@
             --bd:rgba(255,255,255,.1);--bd2:rgba(255,255,255,.18);
         }}
         body{font-family:var(--font);background:var(--bg3);color:var(--t1);min-height:100vh;padding:2rem 1.5rem}
-        .container{max-width:980px;margin:0 auto}
+        .container{max-width:1020px;margin:0 auto}
+
+        /* Header */
         .header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1.75rem}
         .title{font-size:22px;font-weight:500}
         .sub{font-size:13px;color:var(--t2);margin-top:4px}
-        .badge{background:#EAF3DE;color:#3B6D11;font-size:12px;font-weight:500;padding:6px 14px;border-radius:99px;display:inline-flex;align-items:center;gap:7px}
+        .header-badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+        .badge{font-size:12px;font-weight:500;padding:6px 14px;border-radius:99px;display:inline-flex;align-items:center;gap:7px}
+        .badge-pass{background:#EAF3DE;color:#3B6D11}
+        .badge-fail{background:#FCEBEB;color:#A32D2D}
         .pulse{width:8px;height:8px;border-radius:50%;background:#639922;animation:pulse 1.8s infinite}
+        .pulse-fail{background:#E24B4A}
         @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(1.5)}}
+
+        /* Metrics */
         .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:2rem}
         .metric{background:var(--bg1);border:0.5px solid var(--bd);border-radius:var(--r12);padding:1rem 1.25rem;overflow:hidden;position:relative}
         .metric-label{font-size:11px;color:var(--t2);margin-bottom:6px}
         .metric-value{font-size:24px;font-weight:500;color:var(--t1)}
         .metric-value.green{color:#3B6D11}
+        .metric-value.red{color:#A32D2D}
         .metric-sub{font-size:10px;color:var(--t3);margin-top:3px}
         .shine{position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.13),transparent);animation:shine 3.5s ease-in-out infinite}
         @keyframes shine{0%{left:-100%}55%,100%{left:210%}}
+
+        /* Section heading */
         .section-head{font-size:11px;font-weight:500;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin:2rem 0 .75rem}
+
+        /* Charts row */
         .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
         @media(max-width:600px){.charts-row{grid-template-columns:1fr}}
         .card{background:var(--bg1);border:0.5px solid var(--bd);border-radius:var(--r12);padding:1.1rem 1.25rem}
@@ -45,21 +58,30 @@
         .legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:.5rem}
         .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)}
         .ldot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
-        .tl-row{display:grid;grid-template-columns:170px 1fr 44px;align-items:center;gap:10px;margin-bottom:8px;font-size:11px}
+
+        /* Timeline */
+        .tl-row{display:grid;grid-template-columns:180px 1fr 48px;align-items:center;gap:10px;margin-bottom:8px;font-size:11px}
         .tl-row:last-child{margin-bottom:0}
         .tl-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t2);font-family:var(--mono)}
         .tl-bg{min-width:0;background:var(--bg2);border-radius:99px;height:8px;overflow:hidden}
         .tl-fill{height:8px;border-radius:99px;width:0;transition:width 1.3s cubic-bezier(.4,0,.2,1)}
         .tl-ms{text-align:right;color:var(--t3);font-variant-numeric:tabular-nums;white-space:nowrap}
-        .act-stream{display:flex;flex-direction:column;gap:6px;max-height:195px;overflow:hidden;position:relative}
+
+        /* Live replay */
+        .act-stream{display:flex;flex-direction:column;gap:6px;max-height:210px;overflow:hidden;position:relative}
         .act-item{display:flex;align-items:center;gap:8px;font-size:11px;padding:6px 10px;border-radius:7px;background:var(--bg2);animation:slideIn .3s ease both}
+        .act-item.fail-item{background:#FCEBEB}
         @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
         .act-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
         .act-name{flex:1;color:var(--t1);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .act-pill{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500;flex-shrink:0}
         .act-time{color:var(--t3);flex-shrink:0;min-width:35px;text-align:right}
         .act-check{color:#639922;font-size:14px;flex-shrink:0}
+        .act-x{color:#A32D2D;font-size:14px;flex-shrink:0}
+        .replay-btn{display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:5px 12px;border-radius:99px;border:0.5px solid var(--bd2);background:transparent;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .15s}
+        .replay-btn:hover{background:var(--bg2);color:var(--t1)}
 
+        /* Filter & table */
         .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.85rem}
         .fbtn{font-size:11px;padding:5px 13px;border-radius:99px;border:0.5px solid var(--bd2);background:transparent;color:var(--t2);cursor:pointer;transition:all .15s;font-family:var(--font)}
         .fbtn:hover{background:var(--bg2);color:var(--t1)}
@@ -72,31 +94,51 @@
         .tt tbody tr{opacity:0;transform:translateY(5px);transition:opacity .3s,transform .3s,background .12s}
         .tt tbody tr.vis{opacity:1;transform:none}
         .tt tbody tr:hover td{background:var(--bg2)}
-        .sdot{width:6px;height:6px;border-radius:50%;background:#639922;display:inline-block;margin-right:5px}
+        .tt tbody tr.fail-row td{background:#FFF8F8}
+        @media(prefers-color-scheme:dark){.tt tbody tr.fail-row td{background:#2a1c1c}}
+        .sdot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:5px}
         .pill{font-size:10px;font-weight:500;padding:2px 8px;border-radius:99px;white-space:nowrap}
         .mini-bg{height:4px;border-radius:99px;background:var(--bg2);overflow:hidden}
         .mini-fill{height:4px;border-radius:99px;width:0;transition:width 1s ease .5s}
-        .replay-btn{display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:5px 12px;border-radius:99px;border:0.5px solid var(--bd2);background:transparent;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .15s}
-        .replay-btn:hover{background:var(--bg2);color:var(--t1)}
+
+        /* Exception card */
+        .exc-card{background:var(--bg1);border:0.5px solid rgba(227,75,74,.35);border-left:3px solid #E24B4A;border-radius:var(--r12);padding:1.1rem 1.25rem;margin-bottom:12px}
+        .exc-header{display:flex;align-items:center;gap:10px;margin-bottom:.75rem}
+        .exc-title{font-size:13px;font-weight:500;color:#A32D2D}
+        .exc-body{font-family:var(--mono);font-size:10px;color:var(--t2);background:var(--bg2);padding:10px 12px;border-radius:7px;white-space:pre-wrap;word-break:break-word;max-height:160px;overflow-y:auto;line-height:1.65}
+        .exc-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:.65rem}
+        .exc-tag{font-size:10px;padding:2px 8px;border-radius:99px;background:#FCEBEB;color:#A32D2D}
+
+        /* Env table */
+        .env-table{width:100%;border-collapse:collapse;font-size:12px}
+        .env-table td{padding:8px 10px;border-bottom:0.5px solid var(--bd);color:var(--t1)}
+        .env-table td:first-child{color:var(--t2);width:40%;font-weight:500}
+        .env-table tr:last-child td{border-bottom:none}
+
         .footer{margin-top:2rem;text-align:center;font-size:11px;color:var(--t3)}
     </style>
 </head>
 <body>
 <div class="container">
 
+    <!-- Header -->
     <div class="header">
         <div>
-            <div class="title">BankBot Automation Suite</div>
-            <div class="sub">TestNG &middot; 5 modules &middot; 19 methods &middot; ~163s total</div>
+            <div class="title">BankBot Test Report</div>
+            <div class="sub">Guru99 Bank Automation &nbsp;·&nbsp; May 12, 2026, 2:57 pm – 3:03 pm &nbsp;·&nbsp; 20 tests &nbsp;·&nbsp; ~6m 41s</div>
         </div>
-        <span class="badge"><span class="pulse"></span>All 19 passed</span>
+        <div class="header-badges">
+            <span class="badge badge-pass"><span class="pulse"></span>19 passed</span>
+            <span class="badge badge-fail"><span class="pulse pulse-fail"></span>1 failed</span>
+        </div>
     </div>
 
+    <!-- Metrics -->
     <div class="metrics">
         <div class="metric">
             <div class="metric-label">Pass rate</div>
             <div class="metric-value green" id="m-pass">0%</div>
-            <div class="metric-sub">19 of 19</div>
+            <div class="metric-sub">19 of 20</div>
             <div class="shine"></div>
         </div>
         <div class="metric">
@@ -113,35 +155,62 @@
         </div>
         <div class="metric">
             <div class="metric-label">Failures</div>
-            <div class="metric-value green">0</div>
-            <div class="metric-sub">clean run</div>
+            <div class="metric-value red">1</div>
+            <div class="metric-sub">intentionalFailTest</div>
             <div class="shine" style="animation-delay:1.5s"></div>
         </div>
         <div class="metric">
             <div class="metric-label">Modules</div>
             <div class="metric-value">5</div>
-            <div class="metric-sub">all green</div>
+            <div class="metric-sub">Login · Customer · …</div>
             <div class="shine" style="animation-delay:2s"></div>
         </div>
     </div>
 
+    <!-- Exception -->
+    <div class="section-head">Failure detail</div>
+    <div class="exc-card">
+        <div class="exc-header">
+            <i class="ti ti-alert-circle" style="font-size:18px;color:#E24B4A;flex-shrink:0"></i>
+            <span class="exc-title">intentionalFailTest — org.openqa.selenium.TimeoutException</span>
+        </div>
+        <div class="exc-meta">
+            <span class="exc-tag">LoginTest.java:85</span>
+            <span class="exc-tag">BasePage.java:24</span>
+            <span class="exc-tag">By.name: uid</span>
+            <span class="exc-tag">waited 10s</span>
+            <span class="exc-tag">2:57:19 pm</span>
+        </div>
+        <div class="exc-body">org.openqa.selenium.TimeoutException: Expected condition failed: waiting for visibility of element located by By.name: uid (tried for 10 second(s) with 500 milliseconds interval)
+            Driver: ChromeDriver 148.0.7778.97 · Session: b0e026a04a606ed1b1e512f91cd1699b
+
+            at org.openqa.selenium.support.ui.FluentWait.until(FluentWait.java:229)
+            at com.krce.base.BasePage.typeText(BasePage.java:24)
+            at com.krce.pages.LoginPage.enterUserId(LoginPage.java:23)
+            at com.krce.pages.LoginPage.login(LoginPage.java:35)
+            at com.krce.tests.LoginTest.intentionalFailTest(LoginTest.java:85)</div>
+    </div>
+
+    <!-- Module overview -->
     <div class="section-head">Module overview</div>
     <div class="charts-row">
         <div class="card">
             <div class="card-title">Tests per module</div>
             <div class="legend" id="leg1"></div>
-            <div style="position:relative;height:170px"><canvas id="c1" role="img" aria-label="Bar chart: Login 6, Customer 3, Account 3, Fund Transfer 2, Validation 5">Login 6, Customer 3, Account 3, Fund Transfer 2, Validation 5</canvas></div>
+            <div style="position:relative;height:170px"><canvas id="c1" role="img" aria-label="Bar chart: Login 7, Customer 3, Account 3, Fund Transfer 2, Validation 5">Login 7, Customer 3, Account 3, Fund Transfer 2, Validation 5</canvas></div>
         </div>
         <div class="card">
-            <div class="card-title">Time per module (seconds)</div>
+            <div class="card-title">Duration per module (seconds)</div>
             <div class="legend" id="leg2"></div>
-            <div style="position:relative;height:170px"><canvas id="c2" role="img" aria-label="Donut chart: Login 20s, Customer 38s, Account 40s, Fund Transfer 46s, Validation 17s">Login 20s, Customer 38s, Account 40s, Fund Transfer 46s, Validation 17s</canvas></div>
+            <div style="position:relative;height:170px"><canvas id="c2" role="img" aria-label="Donut chart: Login 62s, Customer 76s, Account 95s, Fund Transfer 68s, Validation 63s">Login 62s, Customer 76s, Account 95s, Fund Transfer 68s, Validation 63s</canvas></div>
         </div>
     </div>
 
+    <!-- Execution timeline -->
     <div class="section-head">Execution timeline</div>
     <div class="card" id="timeline" style="margin-bottom:12px"></div>
 
+    <!-- Live run replay -->
     <div class="section-head">Live run replay</div>
     <div class="card" style="margin-bottom:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
@@ -149,72 +218,91 @@
             <button class="replay-btn" id="replay-btn"><i class="ti ti-player-play" style="font-size:13px"></i> Replay</button>
         </div>
         <div class="act-stream" id="act-stream"></div>
-
     </div>
 
-    <div class="section-head">All methods</div>
+    <!-- All methods -->
+    <div class="section-head">All test methods</div>
     <div class="filter-row" id="filters"></div>
     <div class="table-wrap">
         <table class="tt">
             <thead>
             <tr>
                 <th style="width:26px"></th>
-                <th style="width:36%">Method</th>
-                <th style="width:20%">Module</th>
-                <th style="width:24%">Duration</th>
-                <th style="width:14%;text-align:right">ms</th>
+                <th style="width:35%">Method</th>
+                <th style="width:18%">Module</th>
+                <th style="width:10%;text-align:center">Status</th>
+                <th style="width:22%">Duration bar</th>
+                <th style="width:11%;text-align:right">ms</th>
             </tr>
             </thead>
             <tbody id="tbody"></tbody>
         </table>
     </div>
 
-    <div class="footer">BankBot CI &middot; TestNG &middot; 19/19 passed</div>
+    <!-- Environment -->
+    <div class="section-head">System / environment</div>
+    <div class="card" style="margin-bottom:12px">
+        <table class="env-table">
+            <tr><td>OS</td><td>Windows 11 (amd64 10.0)</td></tr>
+            <tr><td>Java</td><td>21.0.9</td></tr>
+            <tr><td>Browser</td><td>Chrome 148.0.7778.97</td></tr>
+            <tr><td>ChromeDriver</td><td>148.0.7778.97</td></tr>
+            <tr><td>Selenium</td><td>4.15.0 · revision 1d14b5521b</td></tr>
+            <tr><td>Tester</td><td>Inigho Benjamin</td></tr>
+            <tr><td>Suite</td><td>BankBot Automation Suite · TestNG</td></tr>
+        </table>
+    </div>
+
+    <div class="footer">BankBot CI &nbsp;·&nbsp; TestNG &nbsp;·&nbsp; 19/20 passed &nbsp;·&nbsp; May 12, 2026</div>
 </div>
 
 <script>
     const tests=[
-        {name:'testValidFundTransfer',mod:'Fund Transfer',ms:40812},
-        {name:'testEditCustomerAddress',mod:'Customer',ms:24378},
-        {name:'testCreateNewAccount',mod:'Account',ms:19444},
-        {name:'testCreateSecondAccount',mod:'Account',ms:16421},
-        {name:'testCreateNewCustomer',mod:'Customer',ms:8116},
-        {name:'testDuplicateEmail',mod:'Customer',ms:4913},
-        {name:'testInvalidPayeeTransfer',mod:'Fund Transfer',ms:4579},
-        {name:'testEmptyNameField',mod:'Validation',ms:4285},
-        {name:'testLogout',mod:'Login',ms:4130},
-        {name:'testInvalidCustomerIdAccount',mod:'Account',ms:4030},
-        {name:'testNonNumericMobile',mod:'Validation',ms:3959},
-        {name:'testValidLogin',mod:'Login',ms:3378},
-        {name:'testBlankLogin',mod:'Login',ms:3066},
-        {name:'testInvalidLogin(invalidUser,invalidPass)',mod:'Login',ms:3045},
-        {name:'testNonNumericPin',mod:'Validation',ms:2928},
-        {name:'testInvalidEmail',mod:'Validation',ms:2688},
-        {name:'testInvalidLogin(wrongUser,YhEbApE)',mod:'Login',ms:2550},
-        {name:'testEmptyCityField',mod:'Validation',ms:2468},
-        {name:'testInvalidLogin(mngr620818,wrongPass)',mod:'Login',ms:1837},
+        {name:'intentionalFailTest',      mod:'Login',        ms:10150, status:'fail'},
+        {name:'testValidFundTransfer',     mod:'Fund Transfer',ms:54915, status:'pass'},
+        {name:'testEditCustomerAddress',   mod:'Customer',     ms:37593, status:'pass'},
+        {name:'testCreateNewAccount',      mod:'Account',      ms:48626, status:'pass'},
+        {name:'testCreateSecondAccount',   mod:'Account',      ms:34029, status:'pass'},
+        {name:'testCreateNewCustomer',     mod:'Customer',     ms:18516, status:'pass'},
+        {name:'testDuplicateEmail',        mod:'Customer',     ms:19955, status:'pass'},
+        {name:'testLogout',                mod:'Login',        ms:17635, status:'pass'},
+        {name:'testInvalidPayeeTransfer',  mod:'Fund Transfer',ms:13352, status:'pass'},
+        {name:'testEmptyNameField',        mod:'Validation',   ms:8079,  status:'pass'},
+        {name:'testInvalidCustomerIdAccount',mod:'Account',    ms:11988, status:'pass'},
+        {name:'testNonNumericMobile',      mod:'Validation',   ms:13469, status:'pass'},
+        {name:'testValidLogin',            mod:'Login',        ms:6387,  status:'pass'},
+        {name:'testBlankLogin',            mod:'Login',        ms:9648,  status:'pass'},
+        {name:'testInvalidLogin(invalidUser,invalidPass)',mod:'Login',ms:7764,status:'pass'},
+        {name:'testInvalidLogin(mngr620818,wrongPass)',   mod:'Login',ms:10529,status:'pass'},
+        {name:'testInvalidLogin(wrongUser,YhEbApE)',      mod:'Login',ms:10377,status:'pass'},
+        {name:'testNonNumericPin',         mod:'Validation',   ms:10951, status:'pass'},
+        {name:'testInvalidEmail',          mod:'Validation',   ms:16125, status:'pass'},
+        {name:'testEmptyCityField',        mod:'Validation',   ms:14371, status:'pass'},
     ];
+
     const chronological=[
-        {name:'testValidLogin',mod:'Login'},
-        {name:'testInvalidLogin(invalidUser,invalidPass)',mod:'Login'},
-        {name:'testInvalidLogin(mngr620818,wrongPass)',mod:'Login'},
-        {name:'testInvalidLogin(wrongUser,YhEbApE)',mod:'Login'},
-        {name:'testBlankLogin',mod:'Login'},
-        {name:'testLogout',mod:'Login'},
-        {name:'testCreateNewCustomer',mod:'Customer'},
-        {name:'testEditCustomerAddress',mod:'Customer'},
-        {name:'testDuplicateEmail',mod:'Customer'},
-        {name:'testCreateNewAccount',mod:'Account'},
-        {name:'testCreateSecondAccount',mod:'Account'},
-        {name:'testInvalidCustomerIdAccount',mod:'Account'},
-        {name:'testValidFundTransfer',mod:'Fund Transfer'},
-        {name:'testInvalidPayeeTransfer',mod:'Fund Transfer'},
-        {name:'testEmptyNameField',mod:'Validation'},
-        {name:'testEmptyCityField',mod:'Validation'},
-        {name:'testNonNumericPin',mod:'Validation'},
-        {name:'testNonNumericMobile',mod:'Validation'},
-        {name:'testInvalidEmail',mod:'Validation'},
+        {name:'intentionalFailTest',        mod:'Login',        status:'fail'},
+        {name:'testValidLogin',             mod:'Login',        status:'pass'},
+        {name:'testInvalidLogin(invalidUser,invalidPass)',mod:'Login',status:'pass'},
+        {name:'testInvalidLogin(mngr620818,wrongPass)',   mod:'Login',status:'pass'},
+        {name:'testInvalidLogin(wrongUser,YhEbApE)',      mod:'Login',status:'pass'},
+        {name:'testBlankLogin',             mod:'Login',        status:'pass'},
+        {name:'testLogout',                 mod:'Login',        status:'pass'},
+        {name:'testCreateNewCustomer',      mod:'Customer',     status:'pass'},
+        {name:'testEditCustomerAddress',    mod:'Customer',     status:'pass'},
+        {name:'testDuplicateEmail',         mod:'Customer',     status:'pass'},
+        {name:'testCreateNewAccount',       mod:'Account',      status:'pass'},
+        {name:'testCreateSecondAccount',    mod:'Account',      status:'pass'},
+        {name:'testInvalidCustomerIdAccount',mod:'Account',     status:'pass'},
+        {name:'testValidFundTransfer',      mod:'Fund Transfer',status:'pass'},
+        {name:'testInvalidPayeeTransfer',   mod:'Fund Transfer',status:'pass'},
+        {name:'testEmptyNameField',         mod:'Validation',   status:'pass'},
+        {name:'testEmptyCityField',         mod:'Validation',   status:'pass'},
+        {name:'testNonNumericPin',          mod:'Validation',   status:'pass'},
+        {name:'testNonNumericMobile',       mod:'Validation',   status:'pass'},
+        {name:'testInvalidEmail',           mod:'Validation',   status:'pass'},
     ];
+
     const modCfg={
         'Login':        {bar:'#639922',pill:'background:#EAF3DE;color:#3B6D11',dot:'#639922'},
         'Customer':     {bar:'#1D9E75',pill:'background:#E1F5EE;color:#0F6E56',dot:'#1D9E75'},
@@ -223,8 +311,9 @@
         'Validation':   {bar:'#7F77DD',pill:'background:#EEEDFE;color:#534AB7',dot:'#7F77DD'},
     };
     const mods=Object.keys(modCfg);
-    const maxMs=tests[0].ms;
+    const maxMs=Math.max(...tests.map(t=>t.ms));
 
+    // Animated counters
     function animCount(el,end,dur,fmt){
         const s=performance.now();
         (function tick(n){
@@ -234,19 +323,21 @@
         })(performance.now());
     }
     setTimeout(()=>{
-        animCount(document.getElementById('m-pass'),100,1400,v=>v+'%');
-        animCount(document.getElementById('m-time'),163,1400,v=>v+'s');
-        animCount(document.getElementById('m-slow'),40,1400,v=>v+'s');
+        animCount(document.getElementById('m-pass'),95,1400,v=>v+'%');
+        animCount(document.getElementById('m-time'),401,1400,v=>v+'s');
+        animCount(document.getElementById('m-slow'),54,1400,v=>v+'s');
     },300);
 
+    // Legends
     const buildLegend=(id,items)=>{
         document.getElementById(id).innerHTML=items.map(i=>`<span class="legend-item"><span class="ldot" style="background:${i.c}"></span>${i.l}</span>`).join('');
     };
     buildLegend('leg1',mods.map(m=>({l:m,c:modCfg[m].bar})));
     buildLegend('leg2',mods.map(m=>({l:m,c:modCfg[m].bar})));
 
-    const modCounts={Login:6,Customer:3,Account:3,'Fund Transfer':2,Validation:5};
-    const modTimes={Login:20,Customer:38,Account:40,'Fund Transfer':46,Validation:17};
+    // Charts
+    const modCounts={Login:7,Customer:3,Account:3,'Fund Transfer':2,Validation:5};
+    const modTimes={Login:62,Customer:76,Account:95,'Fund Transfer':68,Validation:63};
 
     new Chart(document.getElementById('c1'),{
         type:'bar',
@@ -259,10 +350,11 @@
         options:{responsive:true,maintainAspectRatio:false,animation:{animateRotate:true,duration:1400},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+c.raw+'s'}}},cutout:'64%'},
     });
 
+    // Timeline
     const tl=document.getElementById('timeline');
     tl.innerHTML=tests.map((t,i)=>`<div class="tl-row">
   <span class="tl-label" title="${t.name}">${t.name}</span>
-  <div class="tl-bg"><div class="tl-fill" id="tf${i}" style="background:${modCfg[t.mod].bar}"></div></div>
+  <div class="tl-bg"><div class="tl-fill" id="tf${i}" style="background:${t.status==='fail'?'#E24B4A':modCfg[t.mod].bar}"></div></div>
   <span class="tl-ms">${(t.ms/1000).toFixed(1)}s</span>
 </div>`).join('');
     setTimeout(()=>{
@@ -272,38 +364,7 @@
         });
     },500);
 
-    const allMods=['All',...mods];
-    const filtersEl=document.getElementById('filters');
-    let activeF='All';
-    allMods.forEach(m=>{
-        const b=document.createElement('button');
-        b.className='fbtn'+(m==='All'?' active':'');
-        b.textContent=m;
-        b.onclick=()=>{activeF=m;renderTable();document.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('active',x.textContent===m));};
-        filtersEl.appendChild(b);
-    });
-
-    function renderTable(){
-        const filtered=activeF==='All'?tests:tests.filter(t=>t.mod===activeF);
-        document.getElementById('tbody').innerHTML=filtered.map(t=>{
-            const pct=Math.round(t.ms/maxMs*100);
-            const slow=t.ms>10000?'color:#BA7517;font-weight:500':'color:var(--t2)';
-            return `<tr>
-      <td style="padding:8px 8px 8px 14px"><span class="sdot"></span></td>
-      <td style="font-family:var(--mono);font-size:10px">${t.name}</td>
-      <td><span class="pill" style="${modCfg[t.mod].pill}">${t.mod}</span></td>
-      <td><div class="mini-bg"><div class="mini-fill" style="width:${pct}%;background:${modCfg[t.mod].bar}"></div></div></td>
-      <td style="text-align:right;${slow};font-variant-numeric:tabular-nums">${t.ms.toLocaleString()}</td>
-    </tr>`;
-        }).join('');
-        setTimeout(()=>{
-            document.querySelectorAll('.tt tbody tr').forEach((r,i)=>{
-                setTimeout(()=>r.classList.add('vis'),i*40);
-            });
-        },10);
-    }
-    renderTable();
-
+    // Live replay
     const stream=document.getElementById('act-stream');
     let replayTimer=null;
     function runReplay(){
@@ -313,22 +374,67 @@
             if(i>=chronological.length)return;
             const t=chronological[i];
             const ms=tests.find(x=>x.name===t.name)?.ms||0;
+            const isFail=t.status==='fail';
             const div=document.createElement('div');
-            div.className='act-item';
-            div.innerHTML=`<span class="act-dot" style="background:${modCfg[t.mod].dot}"></span>
+            div.className='act-item'+(isFail?' fail-item':'');
+            div.innerHTML=`<span class="act-dot" style="background:${isFail?'#E24B4A':modCfg[t.mod].dot}"></span>
       <span class="act-name">${t.name}</span>
-      <span class="act-pill" style="${modCfg[t.mod].pill}">${t.mod}</span>
+      <span class="act-pill" style="${isFail?'background:#FCEBEB;color:#A32D2D':modCfg[t.mod].pill}">${t.mod}</span>
       <span class="act-time">${(ms/1000).toFixed(1)}s</span>
-      <i class="ti ti-check act-check"></i>`;
+      <i class="ti ${isFail?'ti-x act-x':'ti-check act-check'}"></i>`;
             stream.insertBefore(div,stream.firstChild);
-            while(stream.children.length>6)stream.lastChild.remove();
+            while(stream.children.length>7)stream.lastChild.remove();
             i++;
-            replayTimer=setTimeout(step,500);
+            replayTimer=setTimeout(step,480);
         }
         step();
     }
     runReplay();
     document.getElementById('replay-btn').onclick=()=>{clearTimeout(replayTimer);runReplay();};
+
+    // Filter + Table
+    const allMods=['All',...mods,'Failed'];
+    const filtersEl=document.getElementById('filters');
+    let activeF='All';
+    allMods.forEach(m=>{
+        const b=document.createElement('button');
+        b.className='fbtn'+(m==='All'?' active':'');
+        b.textContent=m==='Failed'?'Failed (1)':m==='All'?'All (20)':m;
+        b.onclick=()=>{activeF=m;renderTable();document.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('active',x===b));};
+        filtersEl.appendChild(b);
+    });
+
+    function renderTable(){
+        let filtered=tests;
+        if(activeF==='Failed') filtered=tests.filter(t=>t.status==='fail');
+        else if(activeF!=='All') filtered=tests.filter(t=>t.mod===activeF);
+        document.getElementById('tbody').innerHTML=filtered.map(t=>{
+            const pct=Math.round(t.ms/maxMs*100);
+            const isFail=t.status==='fail';
+            const msStyle=t.ms>30000?'color:#BA7517;font-weight:500':isFail?'color:#A32D2D;font-weight:500':'color:var(--t2)';
+            return `<tr class="${isFail?'fail-row':''}">
+      <td style="padding:8px 8px 8px 14px"><span class="sdot" style="background:${isFail?'#E24B4A':modCfg[t.mod].bar}"></span></td>
+      <td style="font-family:var(--mono);font-size:10px" title="${t.name}">${t.name}</td>
+      <td><span class="pill" style="${modCfg[t.mod].pill}">${t.mod}</span></td>
+      <td style="text-align:center">
+        <span class="pill" style="${isFail?'background:#FCEBEB;color:#A32D2D':'background:#EAF3DE;color:#3B6D11'}">${isFail?'Fail':'Pass'}</span>
+      </td>
+      <td><div class="mini-bg"><div class="mini-fill" style="width:${pct}%;background:${isFail?'#E24B4A':modCfg[t.mod].bar}"></div></div></td>
+      <td style="text-align:right;${msStyle};font-variant-numeric:tabular-nums">${t.ms.toLocaleString()}</td>
+    </tr>`;
+        }).join('');
+        setTimeout(()=>{
+            document.querySelectorAll('.tt tbody tr').forEach((r,i)=>{
+                setTimeout(()=>r.classList.add('vis'),i*40);
+            });
+            document.querySelectorAll('.mini-fill').forEach(el=>{
+                const w=el.style.width;
+                el.style.width='0';
+                setTimeout(()=>{el.style.width=w;},50);
+            });
+        },10);
+    }
+    renderTable();
 </script>
 </body>
 </html>

@@ -1,0 +1,74 @@
+name: BankBot Automation Suite
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Install Google Chrome
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" \
+            | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update -q
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Run TestNG Tests (headless)
+        run: mvn test -Dheadless=true
+        continue-on-error: true
+
+      - name: Upload TestNG HTML Report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BankBot-TestNG-Report
+          path: test-output/
+          retention-days: 30
+
+      - name: Upload Screenshots artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BankBot-Screenshots
+          path: screenshots/
+          retention-days: 30
+
+      - name: Send Test Report Email
+        uses: dawidd6/action-send-mail@v3
+        if: always()
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "BankBot Automation Report — Run #${{ github.run_number }} | ${{ job.status }}"
+          to: shaliniviswanathan42@gmail.com
+          from: GitHub Actions <${{ secrets.MAIL_USERNAME }}>
+          html_body: file://test-output/BankBot_Automation_Suite/BankBot_Automation_Suite.html
+          attachments: test-output/BankBot_Automation_Suite/BankBot_Automation_Suite.html
