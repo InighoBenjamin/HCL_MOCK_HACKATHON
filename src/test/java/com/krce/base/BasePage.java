@@ -74,6 +74,7 @@ public class BasePage {
     }
 
     public String getPageTitle() {
+
         return driver.getTitle();
     }
 }
