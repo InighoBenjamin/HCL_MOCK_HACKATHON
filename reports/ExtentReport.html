@@ -1,440 +1,1149 @@
+
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>BankBot Test Report</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-    <style>
-        *{box-sizing:border-box;margin:0;padding:0}
-        :root{
-            --bg1:#fff;--bg2:#f5f5f3;--bg3:#eeedea;
-            --t1:#1a1a18;--t2:#6b6b67;--t3:#9b9b96;
-            --bd:rgba(0,0,0,.1);--bd2:rgba(0,0,0,.18);
-            --r8:8px;--r12:12px;
-            --font:system-ui,-apple-system,sans-serif;
-            --mono:'SF Mono','Fira Code',monospace;
-        }
-        @media(prefers-color-scheme:dark){:root{
-            --bg1:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;
-            --t1:#f0efea;--t2:#9b9b96;--t3:#6b6b67;
-            --bd:rgba(255,255,255,.1);--bd2:rgba(255,255,255,.18);
-        }}
-        body{font-family:var(--font);background:var(--bg3);color:var(--t1);min-height:100vh;padding:2rem 1.5rem}
-        .container{max-width:1020px;margin:0 auto}
-
-        /* Header */
-        .header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1.75rem}
-        .title{font-size:22px;font-weight:500}
-        .sub{font-size:13px;color:var(--t2);margin-top:4px}
-        .header-badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-        .badge{font-size:12px;font-weight:500;padding:6px 14px;border-radius:99px;display:inline-flex;align-items:center;gap:7px}
-        .badge-pass{background:#EAF3DE;color:#3B6D11}
-        .badge-fail{background:#FCEBEB;color:#A32D2D}
-        .pulse{width:8px;height:8px;border-radius:50%;background:#639922;animation:pulse 1.8s infinite}
-        .pulse-fail{background:#E24B4A}
-        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(1.5)}}
-
-        /* Metrics */
-        .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:2rem}
-        .metric{background:var(--bg1);border:0.5px solid var(--bd);border-radius:var(--r12);padding:1rem 1.25rem;overflow:hidden;position:relative}
-        .metric-label{font-size:11px;color:var(--t2);margin-bottom:6px}
-        .metric-value{font-size:24px;font-weight:500;color:var(--t1)}
-        .metric-value.green{color:#3B6D11}
-        .metric-value.red{color:#A32D2D}
-        .metric-sub{font-size:10px;color:var(--t3);margin-top:3px}
-        .shine{position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.13),transparent);animation:shine 3.5s ease-in-out infinite}
-        @keyframes shine{0%{left:-100%}55%,100%{left:210%}}
-
-        /* Section heading */
-        .section-head{font-size:11px;font-weight:500;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin:2rem 0 .75rem}
-
-        /* Charts row */
-        .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-        @media(max-width:600px){.charts-row{grid-template-columns:1fr}}
-        .card{background:var(--bg1);border:0.5px solid var(--bd);border-radius:var(--r12);padding:1.1rem 1.25rem}
-        .card-title{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:.85rem}
-        .legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:.5rem}
-        .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)}
-        .ldot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
-
-        /* Timeline */
-        .tl-row{display:grid;grid-template-columns:180px 1fr 48px;align-items:center;gap:10px;margin-bottom:8px;font-size:11px}
-        .tl-row:last-child{margin-bottom:0}
-        .tl-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t2);font-family:var(--mono)}
-        .tl-bg{min-width:0;background:var(--bg2);border-radius:99px;height:8px;overflow:hidden}
-        .tl-fill{height:8px;border-radius:99px;width:0;transition:width 1.3s cubic-bezier(.4,0,.2,1)}
-        .tl-ms{text-align:right;color:var(--t3);font-variant-numeric:tabular-nums;white-space:nowrap}
-
-        /* Live replay */
-        .act-stream{display:flex;flex-direction:column;gap:6px;max-height:210px;overflow:hidden;position:relative}
-        .act-item{display:flex;align-items:center;gap:8px;font-size:11px;padding:6px 10px;border-radius:7px;background:var(--bg2);animation:slideIn .3s ease both}
-        .act-item.fail-item{background:#FCEBEB}
-        @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-        .act-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-        .act-name{flex:1;color:var(--t1);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .act-pill{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500;flex-shrink:0}
-        .act-time{color:var(--t3);flex-shrink:0;min-width:35px;text-align:right}
-        .act-check{color:#639922;font-size:14px;flex-shrink:0}
-        .act-x{color:#A32D2D;font-size:14px;flex-shrink:0}
-        .replay-btn{display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:5px 12px;border-radius:99px;border:0.5px solid var(--bd2);background:transparent;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .15s}
-        .replay-btn:hover{background:var(--bg2);color:var(--t1)}
-
-        /* Filter & table */
-        .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.85rem}
-        .fbtn{font-size:11px;padding:5px 13px;border-radius:99px;border:0.5px solid var(--bd2);background:transparent;color:var(--t2);cursor:pointer;transition:all .15s;font-family:var(--font)}
-        .fbtn:hover{background:var(--bg2);color:var(--t1)}
-        .fbtn.active{background:var(--bg2);color:var(--t1);border-color:var(--bd2);font-weight:500}
-        .table-wrap{background:var(--bg1);border:0.5px solid var(--bd);border-radius:var(--r12);overflow:hidden}
-        .tt{width:100%;border-collapse:collapse;table-layout:fixed}
-        .tt th{text-align:left;font-size:10px;font-weight:500;color:var(--t2);padding:9px 14px;border-bottom:0.5px solid var(--bd);background:var(--bg2);letter-spacing:.05em;text-transform:uppercase}
-        .tt td{font-size:11px;padding:8px 14px;border-bottom:0.5px solid var(--bd);color:var(--t1);vertical-align:middle}
-        .tt tr:last-child td{border-bottom:none}
-        .tt tbody tr{opacity:0;transform:translateY(5px);transition:opacity .3s,transform .3s,background .12s}
-        .tt tbody tr.vis{opacity:1;transform:none}
-        .tt tbody tr:hover td{background:var(--bg2)}
-        .tt tbody tr.fail-row td{background:#FFF8F8}
-        @media(prefers-color-scheme:dark){.tt tbody tr.fail-row td{background:#2a1c1c}}
-        .sdot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:5px}
-        .pill{font-size:10px;font-weight:500;padding:2px 8px;border-radius:99px;white-space:nowrap}
-        .mini-bg{height:4px;border-radius:99px;background:var(--bg2);overflow:hidden}
-        .mini-fill{height:4px;border-radius:99px;width:0;transition:width 1s ease .5s}
-
-        /* Exception card */
-        .exc-card{background:var(--bg1);border:0.5px solid rgba(227,75,74,.35);border-left:3px solid #E24B4A;border-radius:var(--r12);padding:1.1rem 1.25rem;margin-bottom:12px}
-        .exc-header{display:flex;align-items:center;gap:10px;margin-bottom:.75rem}
-        .exc-title{font-size:13px;font-weight:500;color:#A32D2D}
-        .exc-body{font-family:var(--mono);font-size:10px;color:var(--t2);background:var(--bg2);padding:10px 12px;border-radius:7px;white-space:pre-wrap;word-break:break-word;max-height:160px;overflow-y:auto;line-height:1.65}
-        .exc-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:.65rem}
-        .exc-tag{font-size:10px;padding:2px 8px;border-radius:99px;background:#FCEBEB;color:#A32D2D}
-
-        /* Env table */
-        .env-table{width:100%;border-collapse:collapse;font-size:12px}
-        .env-table td{padding:8px 10px;border-bottom:0.5px solid var(--bd);color:var(--t1)}
-        .env-table td:first-child{color:var(--t2);width:40%;font-weight:500}
-        .env-table tr:last-child td{border-bottom:none}
-
-        .footer{margin-top:2rem;text-align:center;font-size:11px;color:var(--t3)}
-    </style>
-</head>
-<body>
-<div class="container">
-
-    <!-- Header -->
-    <div class="header">
-        <div>
-            <div class="title">BankBot Test Report</div>
-            <div class="sub">Guru99 Bank Automation &nbsp;·&nbsp; May 12, 2026, 2:57 pm – 3:03 pm &nbsp;·&nbsp; 20 tests &nbsp;·&nbsp; ~6m 41s</div>
-        </div>
-        <div class="header-badges">
-            <span class="badge badge-pass"><span class="pulse"></span>19 passed</span>
-            <span class="badge badge-fail"><span class="pulse pulse-fail"></span>1 failed</span>
-        </div>
-    </div>
-
-    <!-- Metrics -->
-    <div class="metrics">
-        <div class="metric">
-            <div class="metric-label">Pass rate</div>
-            <div class="metric-value green" id="m-pass">0%</div>
-            <div class="metric-sub">19 of 20</div>
-            <div class="shine"></div>
-        </div>
-        <div class="metric">
-            <div class="metric-label">Total time</div>
-            <div class="metric-value" id="m-time">0s</div>
-            <div class="metric-sub">elapsed</div>
-            <div class="shine" style="animation-delay:.5s"></div>
-        </div>
-        <div class="metric">
-            <div class="metric-label">Slowest test</div>
-            <div class="metric-value" id="m-slow">0s</div>
-            <div class="metric-sub">validFundTransfer</div>
-            <div class="shine" style="animation-delay:1s"></div>
-        </div>
-        <div class="metric">
-            <div class="metric-label">Failures</div>
-            <div class="metric-value red">1</div>
-            <div class="metric-sub">intentionalFailTest</div>
-            <div class="shine" style="animation-delay:1.5s"></div>
-        </div>
-        <div class="metric">
-            <div class="metric-label">Modules</div>
-            <div class="metric-value">5</div>
-            <div class="metric-sub">Login · Customer · …</div>
-            <div class="shine" style="animation-delay:2s"></div>
-        </div>
-    </div>
-
-    <!-- Exception -->
-    <div class="section-head">Failure detail</div>
-    <div class="exc-card">
-        <div class="exc-header">
-            <i class="ti ti-alert-circle" style="font-size:18px;color:#E24B4A;flex-shrink:0"></i>
-            <span class="exc-title">intentionalFailTest — org.openqa.selenium.TimeoutException</span>
-        </div>
-        <div class="exc-meta">
-            <span class="exc-tag">LoginTest.java:85</span>
-            <span class="exc-tag">BasePage.java:24</span>
-            <span class="exc-tag">By.name: uid</span>
-            <span class="exc-tag">waited 10s</span>
-            <span class="exc-tag">2:57:19 pm</span>
-        </div>
-        <div class="exc-body">org.openqa.selenium.TimeoutException: Expected condition failed: waiting for visibility of element located by By.name: uid (tried for 10 second(s) with 500 milliseconds interval)
-            Driver: ChromeDriver 148.0.7778.97 · Session: b0e026a04a606ed1b1e512f91cd1699b
-
-            at org.openqa.selenium.support.ui.FluentWait.until(FluentWait.java:229)
-            at com.krce.base.BasePage.typeText(BasePage.java:24)
-            at com.krce.pages.LoginPage.enterUserId(LoginPage.java:23)
-            at com.krce.pages.LoginPage.login(LoginPage.java:35)
-            at com.krce.tests.LoginTest.intentionalFailTest(LoginTest.java:85)</div>
-    </div>
-
-    <!-- Module overview -->
-    <div class="section-head">Module overview</div>
-    <div class="charts-row">
-        <div class="card">
-            <div class="card-title">Tests per module</div>
-            <div class="legend" id="leg1"></div>
-            <div style="position:relative;height:170px"><canvas id="c1" role="img" aria-label="Bar chart: Login 7, Customer 3, Account 3, Fund Transfer 2, Validation 5">Login 7, Customer 3, Account 3, Fund Transfer 2, Validation 5</canvas></div>
-        </div>
-        <div class="card">
-            <div class="card-title">Duration per module (seconds)</div>
-            <div class="legend" id="leg2"></div>
-            <div style="position:relative;height:170px"><canvas id="c2" role="img" aria-label="Donut chart: Login 62s, Customer 76s, Account 95s, Fund Transfer 68s, Validation 63s">Login 62s, Customer 76s, Account 95s, Fund Transfer 68s, Validation 63s</canvas></div>
-        </div>
-    </div>
-
-    <!-- Execution timeline -->
-    <div class="section-head">Execution timeline</div>
-    <div class="card" id="timeline" style="margin-bottom:12px"></div>
-
-    <!-- Live run replay -->
-    <div class="section-head">Live run replay</div>
-    <div class="card" style="margin-bottom:12px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
-            <span style="font-size:12px;color:var(--t2)">Test execution log</span>
-            <button class="replay-btn" id="replay-btn"><i class="ti ti-player-play" style="font-size:13px"></i> Replay</button>
-        </div>
-        <div class="act-stream" id="act-stream"></div>
-    </div>
-
-    <!-- All methods -->
-    <div class="section-head">All test methods</div>
-    <div class="filter-row" id="filters"></div>
-    <div class="table-wrap">
-        <table class="tt">
-            <thead>
-            <tr>
-                <th style="width:26px"></th>
-                <th style="width:35%">Method</th>
-                <th style="width:18%">Module</th>
-                <th style="width:10%;text-align:center">Status</th>
-                <th style="width:22%">Duration bar</th>
-                <th style="width:11%;text-align:right">ms</th>
-            </tr>
-            </thead>
-            <tbody id="tbody"></tbody>
-        </table>
-    </div>
-
-    <!-- Environment -->
-    <div class="section-head">System / environment</div>
-    <div class="card" style="margin-bottom:12px">
-        <table class="env-table">
-            <tr><td>OS</td><td>Windows 11 (amd64 10.0)</td></tr>
-            <tr><td>Java</td><td>21.0.9</td></tr>
-            <tr><td>Browser</td><td>Chrome 148.0.7778.97</td></tr>
-            <tr><td>ChromeDriver</td><td>148.0.7778.97</td></tr>
-            <tr><td>Selenium</td><td>4.15.0 · revision 1d14b5521b</td></tr>
-            <tr><td>Tester</td><td>Inigho Benjamin</td></tr>
-            <tr><td>Suite</td><td>BankBot Automation Suite · TestNG</td></tr>
-        </table>
-    </div>
-
-    <div class="footer">BankBot CI &nbsp;·&nbsp; TestNG &nbsp;·&nbsp; 19/20 passed &nbsp;·&nbsp; May 12, 2026</div>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>BankBot Test Report</title>
+<link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/extent-framework/extent-github-cdn@b00a2d0486596e73dd7326beacf352c639623a0e/commons/img/logo.png">
+<link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/extent-framework/extent-github-cdn@b00a2d0486596e73dd7326beacf352c639623a0e/commons/img/logo.png">
+<link href="https://cdn.jsdelivr.net/gh/extent-framework/extent-github-cdn@ce8b10435bcbae260c334c0d0c6b61d2c19b6168/spark/css/spark-style.css" rel="stylesheet" />
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/gh/extent-framework/extent-github-cdn@7cc78ce/spark/js/jsontree.js"></script>
+<style type="text/css"></style></head><body class="spa -report standard">
+  <div class="app">
+    <div class="layout">
+<div class="header navbar">
+<div class="vheader">
+<div class="nav-logo">
+<a href="#">
+<div class="logo" style="background-image: url('https://cdn.jsdelivr.net/gh/extent-framework/extent-github-cdn@b00a2d0486596e73dd7326beacf352c639623a0e/commons/img/logo.png')"></div>
+</a>
 </div>
-
+<ul class="nav-left">
+<li class="search-box">
+<a class="search-toggle" href="#">
+<i class="search-icon fa fa-search"></i>
+<i class="search-icon-close fa fa-close"></i>
+</a>
+</li>
+<li class="search-input"><input id="search-tests" class="form-control" type="text" placeholder="Search..."></li>
+</ul>
+<ul class="nav-right">
+<li class="m-r-10">
+<a href="#"><span class="badge badge-primary">Guru99 Bank Automation</span></a>
+</li>
+<li class="m-r-10">
+<a href="#"><span class="badge badge-primary">May 12, 2026 04:30:25 pm</span></a>
+</li>
+</ul>
+</div>
+</div><div class="side-nav">
+<div class="side-nav-inner">
+<ul class="side-nav-menu">
+<li class="nav-item dropdown" onclick="toggleView('test-view')">
+<a id="nav-test" class="dropdown-toggle" href="#">
+<span class="ico"><i class="fa fa-list"></i></span>
+</a>
+</li>
+<li class="nav-item dropdown" onclick="toggleView('exception-view')">
+<a id="nav-exception" class="dropdown-toggle" href="#">
+<span class="ico"><i class="fa fa-bug"></i></span>
+</a>
+</li>
+<li class="nav-item dropdown" onclick="toggleView('dashboard-view')">
+<a id="nav-dashboard" class="dropdown-toggle" href="#">
+<span class="ico"><i class="fa fa-bar-chart"></i></span>
+</a>
+</li>
+</ul>
+</div>
+</div>      <div class="vcontainer">
+        <div class="main-content">
+<div class="test-wrapper row view test-view">
+  <div class="test-list">
+    <div class="test-list-tools">
+<ul class="tools pull-left">
+<li><a href="#"><span class="font-size-14">Tests</span></a></li>
+</ul>
+<ul class="tools text-right">
+<li class="dropdown">
+<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-exclamation-circle"></i></a>
+<ul id="status-toggle" class="dropdown-menu dropdown-md p-v-0">
+<a class="dropdown-item" status="pass" href="#"><span>Pass</span><span class="status success"></span></a>
+<a class="dropdown-item" status="fail" href="#"><span>Fail</span><span class="status danger"></span></a>
+<div class="dropdown-divider"></div>
+<a status="clear" class="dropdown-item" href="#"><span>Clear</span><span class="pull-right"><i class="fa fa-close"></i></span></a>
+</ul>
+</li>
+</ul>
+</div>    <div class="test-list-wrapper scrollable">
+      <ul class="test-list-item">
+        <li class="test-item"  status="fail" test-id="1"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">intentionalFailTest</p>
+            <p class="text-sm">
+              <span>4:30:28 pm</span> / <span>00:00:10:617</span>
+              <span class="badge fail-bg log float-right">Fail</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-fail">intentionalFailTest</h5>
+<span class='badge badge-success'>05.12.2026 4:30:28 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:30:38 pm</span>
+<span class='badge badge-default'>00:00:10:617</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=1</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div>    <div class="row mb-3"><div class="col-md-3">
+<img data-featherlight='screenshots/intentionalFailTest_20260512_163038.png' src="screenshots/intentionalFailTest_20260512_163038.png">
+    
+    </div></div>
+<div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log fail-bg">Fail</span></td>
+        <td>4:30:38 pm</td>
+        <td>
+          <textarea readonly class="code-block">org.openqa.selenium.TimeoutException: Expected condition failed: waiting for visibility of element located by By.name: uid (tried for 10 second(s) with 500 milliseconds interval)
+Build info: version: '4.15.0', revision: '1d14b5521b'
+System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '21.0.9'
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 148.0.7778.97, chrome: {chromedriverVersion: 148.0.7778.97 (6b3fa66a923a..., userDataDir: C:\Users\Acer\AppData\Local...}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:49685}, goog:processID: 125692, networkConnectionEnabled: false, pageLoadStrategy: normal, platformName: windows, proxy: Proxy(), se:cdp: ws://localhost:49685/devtoo..., se:cdpVersion: 148.0.7778.97, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
+Session ID: 5061ed8e0f6534a3169f0411392b8215
+	at org.openqa.selenium.support.ui.WebDriverWait.timeoutException(WebDriverWait.java:84)
+	at org.openqa.selenium.support.ui.FluentWait.until(FluentWait.java:229)
+	at com.krce.base.BasePage.typeText(BasePage.java:24)
+	at com.krce.pages.LoginPage.enterUserId(LoginPage.java:23)
+	at com.krce.pages.LoginPage.login(LoginPage.java:35)
+	at com.krce.tests.LoginTest.intentionalFailTest(LoginTest.java:85)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:141)
+	at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:686)
+	at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:230)
+	at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:63)
+	at org.testng.internal.invokers.TestInvoker$MethodInvocationAgent.invoke(TestInvoker.java:992)
+	at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:203)
+	at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:154)
+	at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:134)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.testng.TestRunner.privateRun(TestRunner.java:739)
+	at org.testng.TestRunner.run(TestRunner.java:614)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:421)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:413)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:373)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:312)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1274)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1208)
+	at org.testng.TestNG.runSuites(TestNG.java:1112)
+	at org.testng.TestNG.run(TestNG.java:1079)
+	at org.apache.maven.surefire.testng.TestNGExecutor.run(TestNGExecutor.java:308)
+	at org.apache.maven.surefire.testng.TestNGXmlTestSuite.execute(TestNGXmlTestSuite.java:71)
+	at org.apache.maven.surefire.testng.TestNGProvider.invoke(TestNGProvider.java:113)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+</textarea>
+          
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="2"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testValidLogin</p>
+            <p class="text-sm">
+              <span>4:30:40 pm</span> / <span>00:00:10:589</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testValidLogin</h5>
+<span class='badge badge-success'>05.12.2026 4:30:40 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:30:50 pm</span>
+<span class='badge badge-default'>00:00:10:589</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=2</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:30:50 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="3"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testInvalidLogin</p>
+            <p class="text-sm">
+              <span>4:30:51 pm</span> / <span>00:00:02:705</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testInvalidLogin</h5>
+<span class='badge badge-success'>05.12.2026 4:30:51 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:30:54 pm</span>
+<span class='badge badge-default'>00:00:02:705</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=3</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:30:54 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="4"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testInvalidLogin</p>
+            <p class="text-sm">
+              <span>4:30:55 pm</span> / <span>00:00:02:578</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testInvalidLogin</h5>
+<span class='badge badge-success'>05.12.2026 4:30:55 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:30:57 pm</span>
+<span class='badge badge-default'>00:00:02:578</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=4</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:30:57 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="5"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testInvalidLogin</p>
+            <p class="text-sm">
+              <span>4:30:58 pm</span> / <span>00:00:13:016</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testInvalidLogin</h5>
+<span class='badge badge-success'>05.12.2026 4:30:58 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:31:11 pm</span>
+<span class='badge badge-default'>00:00:13:016</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=5</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:31:11 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="6"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testBlankLogin</p>
+            <p class="text-sm">
+              <span>4:31:12 pm</span> / <span>00:00:15:768</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testBlankLogin</h5>
+<span class='badge badge-success'>05.12.2026 4:31:12 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:31:28 pm</span>
+<span class='badge badge-default'>00:00:15:768</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=6</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:31:28 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="7"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testLogout</p>
+            <p class="text-sm">
+              <span>4:31:29 pm</span> / <span>00:00:12:571</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testLogout</h5>
+<span class='badge badge-success'>05.12.2026 4:31:29 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:31:42 pm</span>
+<span class='badge badge-default'>00:00:12:571</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=7</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:31:42 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="8"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testCreateNewCustomer</p>
+            <p class="text-sm">
+              <span>4:31:43 pm</span> / <span>00:00:07:577</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testCreateNewCustomer</h5>
+<span class='badge badge-success'>05.12.2026 4:31:43 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:31:51 pm</span>
+<span class='badge badge-default'>00:00:07:577</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=8</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:31:51 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="9"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testEditCustomerAddress</p>
+            <p class="text-sm">
+              <span>4:31:52 pm</span> / <span>00:00:25:669</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testEditCustomerAddress</h5>
+<span class='badge badge-success'>05.12.2026 4:31:52 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:32:17 pm</span>
+<span class='badge badge-default'>00:00:25:669</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=9</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:32:17 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="10"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testDuplicateEmail</p>
+            <p class="text-sm">
+              <span>4:32:18 pm</span> / <span>00:00:15:824</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testDuplicateEmail</h5>
+<span class='badge badge-success'>05.12.2026 4:32:18 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:32:34 pm</span>
+<span class='badge badge-default'>00:00:15:824</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=10</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:32:34 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="11"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testCreateNewAccount</p>
+            <p class="text-sm">
+              <span>4:32:35 pm</span> / <span>00:00:36:037</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testCreateNewAccount</h5>
+<span class='badge badge-success'>05.12.2026 4:32:35 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:33:11 pm</span>
+<span class='badge badge-default'>00:00:36:037</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=11</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:33:11 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="12"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testCreateSecondAccount</p>
+            <p class="text-sm">
+              <span>4:33:12 pm</span> / <span>00:00:22:229</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testCreateSecondAccount</h5>
+<span class='badge badge-success'>05.12.2026 4:33:12 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:33:34 pm</span>
+<span class='badge badge-default'>00:00:22:229</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=12</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:33:34 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="13"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testInvalidCustomerIdAccount</p>
+            <p class="text-sm">
+              <span>4:33:35 pm</span> / <span>00:00:04:188</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testInvalidCustomerIdAccount</h5>
+<span class='badge badge-success'>05.12.2026 4:33:35 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:33:39 pm</span>
+<span class='badge badge-default'>00:00:04:188</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=13</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:33:39 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="14"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testValidFundTransfer</p>
+            <p class="text-sm">
+              <span>4:33:40 pm</span> / <span>00:00:39:974</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testValidFundTransfer</h5>
+<span class='badge badge-success'>05.12.2026 4:33:40 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:34:20 pm</span>
+<span class='badge badge-default'>00:00:39:974</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=14</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:34:20 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="15"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testInvalidPayeeTransfer</p>
+            <p class="text-sm">
+              <span>4:34:21 pm</span> / <span>00:00:05:913</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testInvalidPayeeTransfer</h5>
+<span class='badge badge-success'>05.12.2026 4:34:21 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:34:27 pm</span>
+<span class='badge badge-default'>00:00:05:913</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=15</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:34:27 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="16"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testEmptyNameField</p>
+            <p class="text-sm">
+              <span>4:34:28 pm</span> / <span>00:00:03:777</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testEmptyNameField</h5>
+<span class='badge badge-success'>05.12.2026 4:34:28 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:34:32 pm</span>
+<span class='badge badge-default'>00:00:03:777</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=16</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:34:32 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="17"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testEmptyCityField</p>
+            <p class="text-sm">
+              <span>4:34:32 pm</span> / <span>00:00:03:833</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testEmptyCityField</h5>
+<span class='badge badge-success'>05.12.2026 4:34:32 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:34:36 pm</span>
+<span class='badge badge-default'>00:00:03:833</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=17</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:34:36 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="18"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testNonNumericPin</p>
+            <p class="text-sm">
+              <span>4:34:37 pm</span> / <span>00:00:03:496</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testNonNumericPin</h5>
+<span class='badge badge-success'>05.12.2026 4:34:37 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:34:41 pm</span>
+<span class='badge badge-default'>00:00:03:496</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=18</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:34:41 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="19"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testNonNumericMobile</p>
+            <p class="text-sm">
+              <span>4:34:42 pm</span> / <span>00:00:03:728</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testNonNumericMobile</h5>
+<span class='badge badge-success'>05.12.2026 4:34:42 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:34:45 pm</span>
+<span class='badge badge-default'>00:00:03:728</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=19</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:34:45 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="20"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testInvalidEmail</p>
+            <p class="text-sm">
+              <span>4:34:46 pm</span> / <span>00:00:03:144</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testInvalidEmail</h5>
+<span class='badge badge-success'>05.12.2026 4:34:46 pm</span>
+<span class='badge badge-danger'>05.12.2026 4:34:49 pm</span>
+<span class='badge badge-default'>00:00:03:144</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=20</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>4:34:49 pm</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+<div class="test-content scrollable">
+<div class="test-content-tools">
+<ul><li><a class="back-to-test" href="#"><i class="fa fa-arrow-left"></i></a></li></ul>
+</div>
+<div class="test-content-detail"><div class="detail-body"></div></div>
+</div></div>
+<div class="test-wrapper row view exception-view attributes-view">
+<div class="test-list">
+<div class="test-list-tools">
+<ul class="tools pull-left"><li><a href=""><span class="font-size-14">Exception</span></a></li></ul>
+<ul class="tools text-right"><li><a href="#"><span class="badge badge-primary">1</span></a></li></ul>
+</div>
+<div class="test-list-wrapper scrollable">
+<ul class="test-list-item">
+<li class="test-item">
+<div class="test-detail">
+<span class="meta">
+<span class='badge log badge-danger'>1</span>
+</span>
+<p class="name">org.openqa.selenium.TimeoutException</p>
+<p class="duration text-sm">1 tests</p>
+</div>
+<div class="test-contents d-none">
+<div class="info">
+<h4>org.openqa.selenium.TimeoutException</h4>
+<span status="fail" class='badge log badge-danger'>1 failed</span>
+</div>
+<table class='table table-sm mt-4'>
+<thead>
+<tr>
+<th class="status-col">Status</th>
+<th class="timestamp-col">Timestamp</th>
+<th>TestName</th>
+</tr>
+</thead>
+<tbody>
+<tr class="tag-test-status" status="fail">
+<td><span class="badge log fail-bg">Fail</span></td>
+<td>16:30:28 pm</td>
+<td>
+<a href="#" class="linked" test-id='1' id='1'>intentionalFailTest</a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="test-content scrollable">
+<div class="test-content-detail">
+<div class="detail-body"></div>
+</div>
+</div>
+</div><div class="container-fluid p-4 view dashboard-view">
+<div class="row">
+<div class="col-md-3">
+<div class="card"><div class="card-body">
+<p class="m-b-0">Started</p>
+<h3>May 12, 2026 04:30:25 pm</h3>
+</div></div>
+</div>
+<div class="col-md-3">
+<div class="card"><div class="card-body">
+<p class="m-b-0">Ended</p>
+<h3>May 12, 2026 04:34:49 pm</h3>
+</div></div>
+</div>
+<div class="col-md-3">
+<div class="card"><div class="card-body">
+<p class="m-b-0 text-pass">Tests Passed</p>
+<h3>19</h3>
+</div></div>
+</div>
+<div class="col-md-3">
+<div class="card"><div class="card-body">
+<p class="m-b-0 text-fail">Tests Failed</p>
+<h3>1</h3>
+</div></div>
+</div>
+</div>
+<div class="row">
+<div class="col-md-6">
+<div class="card">
+<div class="card-header">
+<h6 class="card-title">Tests</h6>
+</div>
+<div class="card-body">
+<div class="">
+<canvas id='parent-analysis' width='115' height='90'></canvas>
+</div>
+</div>
+<div class="card-footer">
+<div><small data-tooltip='95%'>
+<b>19</b> tests passed
+</small>
+</div>
+<div>
+<small data-tooltip='5%'><b>1</b> tests failed,
+<b>0</b> skipped, <b data-tooltip='0%'>0</b> others
+</small>
+</div>
+</div>
+</div>
+</div>
+<div class="col-md-6">
+<div class="card">
+<div class="card-header">
+<h6 class="card-title">Log events</h6>
+</div>
+<div class="card-body">
+<div class="">
+<canvas id='events-analysis' width='115' height='90'></canvas>
+</div>
+</div>
+<div class="card-footer">
+<div><small data-tooltip='95%'><b>19</b> events passed</small></div>
+<div>
+<small data-tooltip='5%'><b>1</b> events failed,
+<b data-tooltip='%'>0</b> others
+</small>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row"><div class="col-md-12">
+<div class="card"><div class="card-header"><p>Timeline</p></div>
+<div class="card-body pt-0"><div>
+<canvas id="timeline" height="120"></canvas>
+</div></div>
+</div>
+</div></div>
 <script>
-    const tests=[
-        {name:'intentionalFailTest',      mod:'Login',        ms:10150, status:'fail'},
-        {name:'testValidFundTransfer',     mod:'Fund Transfer',ms:54915, status:'pass'},
-        {name:'testEditCustomerAddress',   mod:'Customer',     ms:37593, status:'pass'},
-        {name:'testCreateNewAccount',      mod:'Account',      ms:48626, status:'pass'},
-        {name:'testCreateSecondAccount',   mod:'Account',      ms:34029, status:'pass'},
-        {name:'testCreateNewCustomer',     mod:'Customer',     ms:18516, status:'pass'},
-        {name:'testDuplicateEmail',        mod:'Customer',     ms:19955, status:'pass'},
-        {name:'testLogout',                mod:'Login',        ms:17635, status:'pass'},
-        {name:'testInvalidPayeeTransfer',  mod:'Fund Transfer',ms:13352, status:'pass'},
-        {name:'testEmptyNameField',        mod:'Validation',   ms:8079,  status:'pass'},
-        {name:'testInvalidCustomerIdAccount',mod:'Account',    ms:11988, status:'pass'},
-        {name:'testNonNumericMobile',      mod:'Validation',   ms:13469, status:'pass'},
-        {name:'testValidLogin',            mod:'Login',        ms:6387,  status:'pass'},
-        {name:'testBlankLogin',            mod:'Login',        ms:9648,  status:'pass'},
-        {name:'testInvalidLogin(invalidUser,invalidPass)',mod:'Login',ms:7764,status:'pass'},
-        {name:'testInvalidLogin(mngr620818,wrongPass)',   mod:'Login',ms:10529,status:'pass'},
-        {name:'testInvalidLogin(wrongUser,YhEbApE)',      mod:'Login',ms:10377,status:'pass'},
-        {name:'testNonNumericPin',         mod:'Validation',   ms:10951, status:'pass'},
-        {name:'testInvalidEmail',          mod:'Validation',   ms:16125, status:'pass'},
-        {name:'testEmptyCityField',        mod:'Validation',   ms:14371, status:'pass'},
-    ];
-
-    const chronological=[
-        {name:'intentionalFailTest',        mod:'Login',        status:'fail'},
-        {name:'testValidLogin',             mod:'Login',        status:'pass'},
-        {name:'testInvalidLogin(invalidUser,invalidPass)',mod:'Login',status:'pass'},
-        {name:'testInvalidLogin(mngr620818,wrongPass)',   mod:'Login',status:'pass'},
-        {name:'testInvalidLogin(wrongUser,YhEbApE)',      mod:'Login',status:'pass'},
-        {name:'testBlankLogin',             mod:'Login',        status:'pass'},
-        {name:'testLogout',                 mod:'Login',        status:'pass'},
-        {name:'testCreateNewCustomer',      mod:'Customer',     status:'pass'},
-        {name:'testEditCustomerAddress',    mod:'Customer',     status:'pass'},
-        {name:'testDuplicateEmail',         mod:'Customer',     status:'pass'},
-        {name:'testCreateNewAccount',       mod:'Account',      status:'pass'},
-        {name:'testCreateSecondAccount',    mod:'Account',      status:'pass'},
-        {name:'testInvalidCustomerIdAccount',mod:'Account',     status:'pass'},
-        {name:'testValidFundTransfer',      mod:'Fund Transfer',status:'pass'},
-        {name:'testInvalidPayeeTransfer',   mod:'Fund Transfer',status:'pass'},
-        {name:'testEmptyNameField',         mod:'Validation',   status:'pass'},
-        {name:'testEmptyCityField',         mod:'Validation',   status:'pass'},
-        {name:'testNonNumericPin',          mod:'Validation',   status:'pass'},
-        {name:'testNonNumericMobile',       mod:'Validation',   status:'pass'},
-        {name:'testInvalidEmail',           mod:'Validation',   status:'pass'},
-    ];
-
-    const modCfg={
-        'Login':        {bar:'#639922',pill:'background:#EAF3DE;color:#3B6D11',dot:'#639922'},
-        'Customer':     {bar:'#1D9E75',pill:'background:#E1F5EE;color:#0F6E56',dot:'#1D9E75'},
-        'Account':      {bar:'#378ADD',pill:'background:#E6F1FB;color:#185FA5',dot:'#378ADD'},
-        'Fund Transfer':{bar:'#EF9F27',pill:'background:#FAEEDA;color:#854F0B',dot:'#EF9F27'},
-        'Validation':   {bar:'#7F77DD',pill:'background:#EEEDFE;color:#534AB7',dot:'#7F77DD'},
-    };
-    const mods=Object.keys(modCfg);
-    const maxMs=Math.max(...tests.map(t=>t.ms));
-
-    // Animated counters
-    function animCount(el,end,dur,fmt){
-        const s=performance.now();
-        (function tick(n){
-            const p=Math.min((n-s)/dur,1);
-            el.textContent=fmt(Math.round(end*p));
-            if(p<1)requestAnimationFrame(tick);
-        })(performance.now());
-    }
-    setTimeout(()=>{
-        animCount(document.getElementById('m-pass'),95,1400,v=>v+'%');
-        animCount(document.getElementById('m-time'),401,1400,v=>v+'s');
-        animCount(document.getElementById('m-slow'),54,1400,v=>v+'s');
-    },300);
-
-    // Legends
-    const buildLegend=(id,items)=>{
-        document.getElementById(id).innerHTML=items.map(i=>`<span class="legend-item"><span class="ldot" style="background:${i.c}"></span>${i.l}</span>`).join('');
-    };
-    buildLegend('leg1',mods.map(m=>({l:m,c:modCfg[m].bar})));
-    buildLegend('leg2',mods.map(m=>({l:m,c:modCfg[m].bar})));
-
-    // Charts
-    const modCounts={Login:7,Customer:3,Account:3,'Fund Transfer':2,Validation:5};
-    const modTimes={Login:62,Customer:76,Account:95,'Fund Transfer':68,Validation:63};
-
-    new Chart(document.getElementById('c1'),{
-        type:'bar',
-        data:{labels:mods,datasets:[{data:mods.map(m=>modCounts[m]),backgroundColor:mods.map(m=>modCfg[m].bar),borderRadius:5,borderSkipped:false}]},
-        options:{responsive:true,maintainAspectRatio:false,animation:{duration:1200,easing:'easeOutQuart'},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+' tests'}}},scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{ticks:{stepSize:2,font:{size:10}},grid:{color:'rgba(128,128,128,.08)'}}}},
-    });
-    new Chart(document.getElementById('c2'),{
-        type:'doughnut',
-        data:{labels:mods,datasets:[{data:mods.map(m=>modTimes[m]),backgroundColor:mods.map(m=>modCfg[m].bar),borderWidth:3,borderColor:'transparent',hoverOffset:8}]},
-        options:{responsive:true,maintainAspectRatio:false,animation:{animateRotate:true,duration:1400},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+c.raw+'s'}}},cutout:'64%'},
-    });
-
-    // Timeline
-    const tl=document.getElementById('timeline');
-    tl.innerHTML=tests.map((t,i)=>`<div class="tl-row">
-  <span class="tl-label" title="${t.name}">${t.name}</span>
-  <div class="tl-bg"><div class="tl-fill" id="tf${i}" style="background:${t.status==='fail'?'#E24B4A':modCfg[t.mod].bar}"></div></div>
-  <span class="tl-ms">${(t.ms/1000).toFixed(1)}s</span>
-</div>`).join('');
-    setTimeout(()=>{
-        tests.forEach((t,i)=>{
-            const pct=Math.round(t.ms/maxMs*100);
-            setTimeout(()=>{const el=document.getElementById('tf'+i);if(el)el.style.width=pct+'%';},i*65);
-        });
-    },500);
-
-    // Live replay
-    const stream=document.getElementById('act-stream');
-    let replayTimer=null;
-    function runReplay(){
-        stream.innerHTML='';
-        let i=0;
-        function step(){
-            if(i>=chronological.length)return;
-            const t=chronological[i];
-            const ms=tests.find(x=>x.name===t.name)?.ms||0;
-            const isFail=t.status==='fail';
-            const div=document.createElement('div');
-            div.className='act-item'+(isFail?' fail-item':'');
-            div.innerHTML=`<span class="act-dot" style="background:${isFail?'#E24B4A':modCfg[t.mod].dot}"></span>
-      <span class="act-name">${t.name}</span>
-      <span class="act-pill" style="${isFail?'background:#FCEBEB;color:#A32D2D':modCfg[t.mod].pill}">${t.mod}</span>
-      <span class="act-time">${(ms/1000).toFixed(1)}s</span>
-      <i class="ti ${isFail?'ti-x act-x':'ti-check act-check'}"></i>`;
-            stream.insertBefore(div,stream.firstChild);
-            while(stream.children.length>7)stream.lastChild.remove();
-            i++;
-            replayTimer=setTimeout(step,480);
-        }
-        step();
-    }
-    runReplay();
-    document.getElementById('replay-btn').onclick=()=>{clearTimeout(replayTimer);runReplay();};
-
-    // Filter + Table
-    const allMods=['All',...mods,'Failed'];
-    const filtersEl=document.getElementById('filters');
-    let activeF='All';
-    allMods.forEach(m=>{
-        const b=document.createElement('button');
-        b.className='fbtn'+(m==='All'?' active':'');
-        b.textContent=m==='Failed'?'Failed (1)':m==='All'?'All (20)':m;
-        b.onclick=()=>{activeF=m;renderTable();document.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('active',x===b));};
-        filtersEl.appendChild(b);
-    });
-
-    function renderTable(){
-        let filtered=tests;
-        if(activeF==='Failed') filtered=tests.filter(t=>t.status==='fail');
-        else if(activeF!=='All') filtered=tests.filter(t=>t.mod===activeF);
-        document.getElementById('tbody').innerHTML=filtered.map(t=>{
-            const pct=Math.round(t.ms/maxMs*100);
-            const isFail=t.status==='fail';
-            const msStyle=t.ms>30000?'color:#BA7517;font-weight:500':isFail?'color:#A32D2D;font-weight:500':'color:var(--t2)';
-            return `<tr class="${isFail?'fail-row':''}">
-      <td style="padding:8px 8px 8px 14px"><span class="sdot" style="background:${isFail?'#E24B4A':modCfg[t.mod].bar}"></span></td>
-      <td style="font-family:var(--mono);font-size:10px" title="${t.name}">${t.name}</td>
-      <td><span class="pill" style="${modCfg[t.mod].pill}">${t.mod}</span></td>
-      <td style="text-align:center">
-        <span class="pill" style="${isFail?'background:#FCEBEB;color:#A32D2D':'background:#EAF3DE;color:#3B6D11'}">${isFail?'Fail':'Pass'}</span>
-      </td>
-      <td><div class="mini-bg"><div class="mini-fill" style="width:${pct}%;background:${isFail?'#E24B4A':modCfg[t.mod].bar}"></div></div></td>
-      <td style="text-align:right;${msStyle};font-variant-numeric:tabular-nums">${t.ms.toLocaleString()}</td>
-    </tr>`;
-        }).join('');
-        setTimeout(()=>{
-            document.querySelectorAll('.tt tbody tr').forEach((r,i)=>{
-                setTimeout(()=>r.classList.add('vis'),i*40);
-            });
-            document.querySelectorAll('.mini-fill').forEach(el=>{
-                const w=el.style.width;
-                el.style.width='0';
-                setTimeout(()=>{el.style.width=w;},50);
-            });
-        },10);
-    }
-    renderTable();
+var timeline = {
+"intentionalFailTest":10.617,"testValidLogin":10.589,"testInvalidLogin":2.705,"testInvalidLogin":2.578,"testInvalidLogin":13.016,"testBlankLogin":15.768,"testLogout":12.571,"testCreateNewCustomer":7.577,"testEditCustomerAddress":25.669,"testDuplicateEmail":15.824,"testCreateNewAccount":36.037,"testCreateSecondAccount":22.229,"testInvalidCustomerIdAccount":4.188,"testValidFundTransfer":39.974,"testInvalidPayeeTransfer":5.913,"testEmptyNameField":3.777,"testEmptyCityField":3.833,"testNonNumericPin":3.496,"testNonNumericMobile":3.728,"testInvalidEmail":3.144
+};
 </script>
-</body>
+<div class="row">
+<div class="col-lg-6 col-md-12 sysenv-container">
+<div class="card">
+<div class="card-header"><p>System/Environment</p></div>
+<div class="card-body pb-0 pt-0"><table class="table table-sm table-bordered">
+<thead><tr class="bg-gray"><th>Name</th><th>Value</th></tr></thead>
+<tbody>
+<tr>
+<td>OS</td>
+<td>Windows 11</td>
+</tr>
+<tr>
+<td>Java</td>
+<td>21.0.9</td>
+</tr>
+<tr>
+<td>Tester</td>
+<td>KRCE Student</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+</div>
+<script>
+var statusGroup = {
+parentCount: 5,
+passParent: 19,
+failParent: 1,
+warningParent: 0,
+skipParent: 0,
+childCount: 5,
+passChild: 0,
+failChild: 0,
+warningChild: 0,
+skipChild: 0,
+infoChild: 0,
+grandChildCount: 5,
+passGrandChild: 0,
+failGrandChild: 0,
+warningGrandChild: 0,
+skipGrandChild: 0,
+infoGrandChild: 0,
+eventsCount: 5,
+passEvents: 19,
+failEvents: 1,
+warningEvents: 0,
+skipEvents: 0,
+infoEvents: 0
+};
+</script>        </div>
+      </div>
+    </div>
+  </div>
+<script src="https://cdn.jsdelivr.net/gh/extent-framework/extent-github-cdn@ce8b10435bcbae260c334c0d0c6b61d2c19b6168/spark/js/spark-script.js"></script>
+<script type="text/javascript"></script></body>
 </html>

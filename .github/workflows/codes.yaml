@@ -42,12 +42,28 @@ jobs:
         run: mvn test -Dheadless=true
         continue-on-error: true
 
+      # Find where the HTML report actually landed
+      - name: Locate HTML report
+        if: always()
+        run: |
+          echo "=== Searching for HTML reports ==="
+          find . -name "*.html" | grep -v node_modules | grep -v ".git" || true
+          echo ""
+          echo "=== target/surefire-reports ==="
+          ls target/surefire-reports/ 2>/dev/null || echo "Directory not found"
+          echo ""
+          echo "=== test-output ==="
+          ls test-output/ 2>/dev/null || echo "Directory not found"
+
       - name: Upload TestNG HTML Report artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: BankBot-TestNG-Report
-          path: test-output/
+          path: |
+            target/surefire-reports/
+            test-output/
+          if-no-files-found: warn
           retention-days: 30
 
       - name: Upload Screenshots artifact
@@ -56,7 +72,34 @@ jobs:
         with:
           name: BankBot-Screenshots
           path: screenshots/
+          if-no-files-found: warn
           retention-days: 30
+
+      # Copy whichever report exists to a known fixed path for the email step
+      - name: Prepare report for email
+        if: always()
+        run: |
+          mkdir -p email-report
+          # Try ExtentReport first
+          if [ -f "reports/ExtentReport.html" ]; then
+            cp reports/ExtentReport.html email-report/report.html
+            echo "Used: reports/ExtentReport.html"
+          # Try test-output TestNG report
+          elif [ -f "test-output/BankBot_Automation_Suite/BankBot_Automation_Suite.html" ]; then
+            cp test-output/BankBot_Automation_Suite/BankBot_Automation_Suite.html email-report/report.html
+            echo "Used: test-output TestNG report"
+          # Try surefire emailable report
+          elif [ -f "target/surefire-reports/emailable-report.html" ]; then
+            cp target/surefire-reports/emailable-report.html email-report/report.html
+            echo "Used: target/surefire-reports/emailable-report.html"
+          # Use any HTML in surefire-reports
+          elif ls target/surefire-reports/*.html 2>/dev/null | head -1; then
+            cp $(ls target/surefire-reports/*.html | head -1) email-report/report.html
+            echo "Used: first HTML in surefire-reports"
+          else
+            echo "<h2>BankBot Report</h2><p>No HTML report file was found.</p>" > email-report/report.html
+            echo "No report found — used placeholder"
+          fi
 
       - name: Send Test Report Email
         uses: dawidd6/action-send-mail@v3
@@ -67,8 +110,8 @@ jobs:
           secure: true
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "BankBot Automation Report — Run #${{ github.run_number }} | ${{ job.status }}"
+          subject: "BankBot Automation — Run #${{ github.run_number }} | ${{ job.status }}"
           to: shaliniviswanathan42@gmail.com
           from: GitHub Actions <${{ secrets.MAIL_USERNAME }}>
-          html_body: file://test-output/BankBot_Automation_Suite/BankBot_Automation_Suite.html
-          attachments: test-output/BankBot_Automation_Suite/BankBot_Automation_Suite.html
+          html_body: file://email-report/report.html
+          attachments: email-report/report.html
